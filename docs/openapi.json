@@ -1,0 +1,4252 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "greencode API",
+    "description": "Logística reversa de resíduos eletrônicos",
+    "version": "3.0.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "parceiroApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "sistema"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/provisionar": {
+      "post": {
+        "summary": "Cria o primeiro administrador (só com o banco sem usuários)",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "senha"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "senha": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Autentica e devolve o JWT",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "senha"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "senha": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "summary": "Dados do usuário autenticado",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/senha": {
+      "post": {
+        "summary": "Altera a própria senha",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "senhaAtual",
+                  "novaSenha"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "senhaAtual": {
+                    "type": "string"
+                  },
+                  "novaSenha": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/usuarios": {
+      "post": {
+        "tags": [
+          "usuarios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "senha",
+                  "papel"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "senha": {
+                    "type": "string"
+                  },
+                  "papel": {
+                    "type": "string",
+                    "enum": [
+                      "admin",
+                      "cadastro",
+                      "almoxarifado",
+                      "auditor"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "usuarios"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/usuarios/{id}/username": {
+      "patch": {
+        "summary": "Renomeia um usuário",
+        "tags": [
+          "usuarios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/usuarios/{id}/papel": {
+      "patch": {
+        "summary": "Altera o papel de outro usuário",
+        "tags": [
+          "usuarios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "papel"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "papel": {
+                    "type": "string",
+                    "enum": [
+                      "admin",
+                      "cadastro",
+                      "almoxarifado",
+                      "auditor"
+                    ]
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/usuarios/{id}/senha": {
+      "patch": {
+        "summary": "Admin redefine a senha de outro usuário",
+        "tags": [
+          "usuarios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "novaSenha"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "novaSenha": {
+                    "type": "string"
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/usuarios/{id}/ativo": {
+      "patch": {
+        "summary": "Ativa ou desativa um usuário",
+        "tags": [
+          "usuarios"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ativo"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "ativo": {
+                    "type": "boolean"
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/usuarios/{id}": {
+      "delete": {
+        "summary": "Desativa (soft) ou, com permanente=true, exclui de vez (só sem histórico)",
+        "tags": [
+          "usuarios"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "in": "query",
+            "name": "permanente",
+            "required": false,
+            "description": "false = inativa (soft delete); true = apaga de vez (somente admin)."
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "in": "query",
+            "name": "versao",
+            "required": false,
+            "description": "Versão lida pelo cliente (concorrência otimista)."
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/organizacoes": {
+      "post": {
+        "tags": [
+          "organizacoes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "cnpj",
+                  "razaoSocial"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "cnpj": {
+                    "type": "string"
+                  },
+                  "razaoSocial": {
+                    "type": "string"
+                  },
+                  "contato": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "organizacoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "in": "query",
+            "name": "incluirInativos",
+            "required": false,
+            "description": "Inclui registros inativados."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/organizacoes/{cnpj}": {
+      "get": {
+        "tags": [
+          "organizacoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "cnpj",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "organizacoes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "razaoSocial": {
+                    "type": "string"
+                  },
+                  "contato": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "cnpj",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Soft delete em cadeia (organização + lotes) ou, com permanente=true (admin), delete definitivo em cadeia",
+        "tags": [
+          "organizacoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "in": "query",
+            "name": "permanente",
+            "required": false,
+            "description": "false = inativa (soft delete); true = apaga de vez (somente admin)."
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "in": "query",
+            "name": "versao",
+            "required": false,
+            "description": "Versão lida pelo cliente (concorrência otimista)."
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "cnpj",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/organizacoes/{cnpj}/reativar": {
+      "post": {
+        "summary": "Reativa a organização e os lotes inativados junto com ela",
+        "tags": [
+          "organizacoes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "cnpj",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/contratos": {
+      "post": {
+        "tags": [
+          "contratos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "orgCnpj",
+                  "dataInicio",
+                  "frequenciaColetaDias"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "orgCnpj": {
+                    "type": "string"
+                  },
+                  "dataInicio": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "frequenciaColetaDias": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "condicoes": {
+                    "type": "string"
+                  },
+                  "clausulas": {}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "contratos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "in": "query",
+            "name": "incluirInativos",
+            "required": false,
+            "description": "Inclui registros inativados."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/contratos/{id}": {
+      "get": {
+        "tags": [
+          "contratos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "contratos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "frequenciaColetaDias": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "condicoes": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "clausulas": {},
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete definitivo (contrato não tem soft delete; use encerrar para inativar)",
+        "tags": [
+          "contratos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/contratos/{id}/encerrar": {
+      "post": {
+        "tags": [
+          "contratos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/contratos/{id}/reativar": {
+      "post": {
+        "summary": "Reabre um contrato encerrado",
+        "tags": [
+          "contratos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/lotes": {
+      "post": {
+        "summary": "Cria um lote (e opcionalmente seus equipamentos) em uma única transação",
+        "tags": [
+          "lotes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "orgCnpj",
+                  "nf",
+                  "transportadora"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "orgCnpj": {
+                    "type": "string"
+                  },
+                  "nf": {
+                    "type": "string"
+                  },
+                  "transportadora": {
+                    "type": "string"
+                  },
+                  "dataEntrada": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "equipamentos": {
+                    "type": "array",
+                    "maxItems": 500,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "tipo"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "tipo": {
+                          "type": "string",
+                          "pattern": "\\S"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "lotes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "recebido",
+                "em_triagem",
+                "triagem_completa",
+                "encerrado"
+              ]
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "cnpj",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "in": "query",
+            "name": "incluirInativos",
+            "required": false,
+            "description": "Inclui registros inativados."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/lotes/{id}": {
+      "get": {
+        "tags": [
+          "lotes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Edita NF, transportadora ou data de entrada (o status é derivado e não é editável)",
+        "tags": [
+          "lotes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "nf": {
+                    "type": "string"
+                  },
+                  "transportadora": {
+                    "type": "string"
+                  },
+                  "dataEntrada": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Soft delete (equipamentos somem junto) ou, com permanente=true (admin), delete definitivo em cadeia",
+        "tags": [
+          "lotes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "in": "query",
+            "name": "permanente",
+            "required": false,
+            "description": "false = inativa (soft delete); true = apaga de vez (somente admin)."
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "in": "query",
+            "name": "versao",
+            "required": false,
+            "description": "Versão lida pelo cliente (concorrência otimista)."
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/lotes/{id}/reativar": {
+      "post": {
+        "tags": [
+          "lotes"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/equipamentos": {
+      "post": {
+        "summary": "Cadastra um equipamento (código de barras = id; posição automática no lote)",
+        "tags": [
+          "equipamentos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "loteId",
+                  "tipo"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "loteId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "tipo": {
+                    "type": "string",
+                    "pattern": "\\S",
+                    "description": "Tipo do equipamento (não pode ser vazio)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "equipamentos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "query",
+            "name": "loteId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "aguardando_triagem",
+                "em_triagem",
+                "triado",
+                "desmonte",
+                "reciclagem",
+                "descarte_seguro",
+                "revenda"
+              ]
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/equipamentos/{id}": {
+      "get": {
+        "tags": [
+          "equipamentos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Corrige o tipo do equipamento",
+        "tags": [
+          "equipamentos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "tipo"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "tipo": {
+                    "type": "string",
+                    "pattern": "\\S",
+                    "description": "Tipo do equipamento (não pode ser vazio)."
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete definitivo (equipamento não tem soft delete)",
+        "tags": [
+          "equipamentos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/equipamentos/{id}/triagem": {
+      "post": {
+        "tags": [
+          "equipamentos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/equipamentos/{id}/status": {
+      "patch": {
+        "tags": [
+          "equipamentos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "aguardando_triagem",
+                      "em_triagem",
+                      "triado",
+                      "desmonte",
+                      "reciclagem",
+                      "descarte_seguro",
+                      "revenda"
+                    ]
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/equipamentos/{id}/estado": {
+      "patch": {
+        "summary": "Altera o estado físico (queda de 2+ categorias exige justificativa)",
+        "tags": [
+          "equipamentos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "estadoFisico"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "estadoFisico": {
+                    "type": "string"
+                  },
+                  "justificativa": {
+                    "type": "string"
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/equipamentos/{id}/depreciacao": {
+      "get": {
+        "summary": "Coeficiente de depreciação (curva própria de cada tipo)",
+        "tags": [
+          "equipamentos"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 0
+            },
+            "in": "query",
+            "name": "meses",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/rastreio/{id}": {
+      "get": {
+        "summary": "Histórico de movimentações do equipamento",
+        "tags": [
+          "rastreio"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/config": {
+      "get": {
+        "summary": "Lista os parâmetros globais",
+        "tags": [
+          "config"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/config/{chave}": {
+      "get": {
+        "tags": [
+          "config"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "chave",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "put": {
+        "summary": "Cria ou atualiza um parâmetro global (ex.: aliquota_icms)",
+        "tags": [
+          "config"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "valor"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "valor": {
+                    "type": "string"
+                  },
+                  "versao": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "Versão lida pelo cliente (concorrência otimista)."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "chave",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "config"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "chave",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/auditoria": {
+      "get": {
+        "summary": "Trilha de auditoria (equivale ao journal do CLI)",
+        "tags": [
+          "auditoria"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "acao",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/analises/organizacoes/{id}": {
+      "get": {
+        "summary": "Calcula as três análises de uma organização",
+        "tags": [
+          "Análises internas"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/analises/equipamentos/{id}/observacoes": {
+      "post": {
+        "summary": "Registra uma medição histórica de equipamento",
+        "tags": [
+          "Análises internas"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "data",
+                  "idadeDias",
+                  "marca",
+                  "modelo",
+                  "estado"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Data da medição em UTC."
+                  },
+                  "idadeDias": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 36500,
+                    "description": "Dias decorridos de uso na data da medição."
+                  },
+                  "marca": {
+                    "type": "string",
+                    "maxLength": 80,
+                    "pattern": "\\S"
+                  },
+                  "modelo": {
+                    "type": "string",
+                    "maxLength": 120,
+                    "pattern": "\\S"
+                  },
+                  "estado": {
+                    "type": "string",
+                    "enum": [
+                      "novo",
+                      "seminovo",
+                      "bom",
+                      "regular",
+                      "ruim",
+                      "sucata"
+                    ]
+                  },
+                  "falha": {
+                    "type": "boolean",
+                    "description": "Verdadeiro quando a falha tornou o equipamento inservível."
+                  },
+                  "recuperacao": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 9999999999.99,
+                    "description": "Valor bruto recuperado em reais."
+                  },
+                  "custo": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 9999999999.99,
+                    "description": "Custo direto de recuperação em reais."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/chaves-parceiro": {
+      "post": {
+        "summary": "Emite uma chave e revela seu valor uma única vez",
+        "tags": [
+          "Administração de parceiros"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "organizacaoId",
+                  "nome",
+                  "escopos"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "organizacaoId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "nome": {
+                    "type": "string",
+                    "pattern": "\\S",
+                    "maxLength": 120
+                  },
+                  "escopos": {
+                    "type": "array",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "rastreio_leitura",
+                        "lotes_escrita",
+                        "relatorios_leitura"
+                      ]
+                    }
+                  },
+                  "limiteMinuto": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "default": 60
+                  },
+                  "validadeDias": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 365,
+                    "default": 90
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/organizacoes/{id}/chaves-parceiro": {
+      "get": {
+        "summary": "Lista os metadados das chaves da organização",
+        "tags": [
+          "Administração de parceiros"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/admin/chaves-parceiro/{id}": {
+      "delete": {
+        "summary": "Revoga uma chave imediatamente",
+        "tags": [
+          "Administração de parceiros"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/v1/public/lotes": {
+      "post": {
+        "summary": "Cadastra um lote na organização da chave",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: lotes_escrita. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nf": {
+                    "type": "string",
+                    "maxLength": 80,
+                    "pattern": "\\S",
+                    "description": "Nota fiscal única por organização.",
+                    "example": "NF-530"
+                  },
+                  "transportadora": {
+                    "type": "string",
+                    "maxLength": 160,
+                    "pattern": "\\S",
+                    "description": "Nome da transportadora.",
+                    "example": "TransVerde"
+                  },
+                  "dataEntrada": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Data UTC da entrada, até 90 dias no passado. Padrão: hoje.",
+                    "example": "2026-11-24"
+                  },
+                  "equipamentos": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "tipo": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "pattern": "\\S",
+                          "description": "Tipo do equipamento.",
+                          "example": "notebook"
+                        }
+                      },
+                      "required": [
+                        "tipo"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 100
+                  }
+                },
+                "required": [
+                  "nf",
+                  "transportadora"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "nf": "NF-530",
+                "transportadora": "TransVerde",
+                "equipamentos": [
+                  {
+                    "tipo": "notebook"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "lote": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "nf": {
+                          "type": "string",
+                          "maxLength": 80,
+                          "pattern": "\\S",
+                          "description": "Nota fiscal única por organização.",
+                          "example": "NF-530"
+                        },
+                        "transportadora": {
+                          "type": "string",
+                          "maxLength": 160,
+                          "pattern": "\\S",
+                          "description": "Nome da transportadora.",
+                          "example": "TransVerde"
+                        },
+                        "dataEntrada": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Data de entrada representada às 00:00 UTC."
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "recebido",
+                            "em_triagem",
+                            "triagem_completa",
+                            "encerrado"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "nf",
+                        "transportadora",
+                        "dataEntrada",
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "equipamentos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "codigoBarrasInterno": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "loteId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "tipo": {
+                            "type": "string",
+                            "maxLength": 120,
+                            "pattern": "\\S",
+                            "description": "Tipo do equipamento.",
+                            "example": "notebook"
+                          },
+                          "posicao": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "estadoFisico": {
+                            "type": "string",
+                            "enum": [
+                              "novo",
+                              "seminovo",
+                              "bom",
+                              "regular",
+                              "ruim",
+                              "sucata"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "aguardando_triagem",
+                              "em_triagem",
+                              "triado",
+                              "desmonte",
+                              "reciclagem",
+                              "descarte_seguro",
+                              "revenda"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "codigoBarrasInterno",
+                          "loteId",
+                          "tipo",
+                          "posicao",
+                          "estadoFisico",
+                          "status"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "lote",
+                    "equipamentos"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Operação incompatível com o estado atual do recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Operação incompatível com o estado atual do recurso.",
+                  "example": {
+                    "erro": "Conflito",
+                    "mensagem": "Operação incompatível com o estado atual do recurso."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/lotes/{id}": {
+      "get": {
+        "summary": "Consulta os dados e o status de um lote ativo",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: rastreio_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nf": {
+                      "type": "string",
+                      "maxLength": 80,
+                      "pattern": "\\S",
+                      "description": "Nota fiscal única por organização.",
+                      "example": "NF-530"
+                    },
+                    "transportadora": {
+                      "type": "string",
+                      "maxLength": 160,
+                      "pattern": "\\S",
+                      "description": "Nome da transportadora.",
+                      "example": "TransVerde"
+                    },
+                    "dataEntrada": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Data de entrada representada às 00:00 UTC."
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "recebido",
+                        "em_triagem",
+                        "triagem_completa",
+                        "encerrado"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "nf",
+                    "transportadora",
+                    "dataEntrada",
+                    "status"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "id": "0bd5437b-bd61-4d3e-9e65-40d5aec8df03",
+                    "nf": "NF-530",
+                    "transportadora": "TransVerde",
+                    "dataEntrada": "2026-11-24T00:00:00.000Z",
+                    "status": "recebido"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/equipamentos/{id}/rastreio": {
+      "get": {
+        "summary": "Consulta o equipamento e seu histórico de movimentações",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: rastreio_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false,
+            "description": "Página inicial igual a 1."
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false,
+            "description": "Quantidade de itens por página."
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "equipamento": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "codigoBarrasInterno": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "loteId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "tipo": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "pattern": "\\S",
+                          "description": "Tipo do equipamento.",
+                          "example": "notebook"
+                        },
+                        "posicao": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "estadoFisico": {
+                          "type": "string",
+                          "enum": [
+                            "novo",
+                            "seminovo",
+                            "bom",
+                            "regular",
+                            "ruim",
+                            "sucata"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "aguardando_triagem",
+                            "em_triagem",
+                            "triado",
+                            "desmonte",
+                            "reciclagem",
+                            "descarte_seguro",
+                            "revenda"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "codigoBarrasInterno",
+                        "loteId",
+                        "tipo",
+                        "posicao",
+                        "estadoFisico",
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "movimentacoes": {
+                      "type": "object",
+                      "properties": {
+                        "itens": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "criadoEm": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "statusDe": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "statusPara": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "estadoDe": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "estadoPara": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "criadoEm",
+                              "statusDe",
+                              "statusPara",
+                              "estadoDe",
+                              "estadoPara"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "pagina": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "tamanhoPagina": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "totalPaginas": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "itens",
+                        "total",
+                        "pagina",
+                        "tamanhoPagina",
+                        "totalPaginas"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "equipamento",
+                    "movimentacoes"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/relatorios": {
+      "post": {
+        "summary": "Enfileira um relatório analítico completo",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: relatorios_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "situacao": {
+                      "type": "string",
+                      "enum": [
+                        "pendente",
+                        "processando",
+                        "concluido",
+                        "falhou"
+                      ],
+                      "example": "pendente"
+                    },
+                    "tentativas": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 0
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "concluidoEm": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    },
+                    "agendamento": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "erro": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "situacao",
+                    "tentativas",
+                    "criadoEm",
+                    "concluidoEm",
+                    "agendamento",
+                    "erro"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Lista tarefas e relatórios históricos da organização",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: relatorios_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false,
+            "description": "Página inicial igual a 1."
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false,
+            "description": "Quantidade de itens por página."
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "itens": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "situacao": {
+                            "type": "string",
+                            "enum": [
+                              "pendente",
+                              "processando",
+                              "concluido",
+                              "falhou"
+                            ],
+                            "example": "pendente"
+                          },
+                          "tentativas": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "example": 0
+                          },
+                          "criadoEm": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "concluidoEm": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "agendamento": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "erro": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "situacao",
+                          "tentativas",
+                          "criadoEm",
+                          "concluidoEm",
+                          "agendamento",
+                          "erro"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "pagina": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "tamanhoPagina": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "totalPaginas": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "itens",
+                    "total",
+                    "pagina",
+                    "tamanhoPagina",
+                    "totalPaginas"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/relatorios/{id}": {
+      "get": {
+        "summary": "Consulta a situação de uma tarefa",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: relatorios_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "situacao": {
+                      "type": "string",
+                      "enum": [
+                        "pendente",
+                        "processando",
+                        "concluido",
+                        "falhou"
+                      ],
+                      "example": "pendente"
+                    },
+                    "tentativas": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 0
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "concluidoEm": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    },
+                    "agendamento": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "erro": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "situacao",
+                    "tentativas",
+                    "criadoEm",
+                    "concluidoEm",
+                    "agendamento",
+                    "erro"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/relatorios/{id}/download": {
+      "get": {
+        "summary": "Baixa o resultado concluído em JSON",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: relatorios_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "versaoModelo": {
+                      "type": "string"
+                    },
+                    "organizacaoId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "geradoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "eficiencia": {
+                      "type": "object",
+                      "properties": {
+                        "lotesAtivos": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "semConclusaoUtilizavel": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "entradaAConclusao": {
+                          "type": "object",
+                          "properties": {
+                            "lotes": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "mediaDias": {
+                              "type": "number",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "lotes",
+                            "mediaDias"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "espera": {
+                          "type": "object",
+                          "properties": {
+                            "lotes": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "mediaDias": {
+                              "type": "number",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "lotes",
+                            "mediaDias"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "triagem": {
+                          "type": "object",
+                          "properties": {
+                            "lotes": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "mediaDias": {
+                              "type": "number",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "lotes",
+                            "mediaDias"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "etapaMaisLonga": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "porOperador": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "operadorId": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "lotes": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "mediaDias": {
+                                "type": "number",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "operadorId",
+                              "lotes",
+                              "mediaDias"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "porMes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "mes": {
+                                "type": "string"
+                              },
+                              "lotes": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "mediaDias": {
+                                "type": "number",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "mes",
+                              "lotes",
+                              "mediaDias"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "lotesAtivos",
+                        "semConclusaoUtilizavel",
+                        "entradaAConclusao",
+                        "espera",
+                        "triagem",
+                        "etapaMaisLonga",
+                        "porOperador",
+                        "porMes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rentabilidade": {
+                      "type": "object",
+                      "properties": {
+                        "moeda": {
+                          "type": "string"
+                        },
+                        "equipamentosComValor": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "grupos": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "pattern": "\\S",
+                                "description": "Tipo do equipamento.",
+                                "example": "notebook"
+                              },
+                              "marca": {
+                                "type": "string"
+                              },
+                              "modelo": {
+                                "type": "string"
+                              },
+                              "estado": {
+                                "type": "string"
+                              },
+                              "amostras": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "amostrasComCusto": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "recuperacaoMedia": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "margemMedia": {
+                                "type": "number",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "marca",
+                              "modelo",
+                              "estado",
+                              "amostras",
+                              "amostrasComCusto",
+                              "recuperacaoMedia",
+                              "margemMedia"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "moeda",
+                        "equipamentosComValor",
+                        "grupos"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "vidaUtil": {
+                      "type": "object",
+                      "properties": {
+                        "metodo": {
+                          "type": "string"
+                        },
+                        "grupos": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "pattern": "\\S",
+                                "description": "Tipo do equipamento.",
+                                "example": "notebook"
+                              },
+                              "marca": {
+                                "type": "string"
+                              },
+                              "modelo": {
+                                "type": "string"
+                              },
+                              "amostras": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "equipamentos": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "motivo": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "r2": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "idadeProjetadaDias": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "vidaRemanescenteDias": {
+                                "type": "number",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "marca",
+                              "modelo",
+                              "amostras",
+                              "equipamentos",
+                              "motivo",
+                              "r2",
+                              "idadeProjetadaDias",
+                              "vidaRemanescenteDias"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "metodo",
+                        "grupos"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "versaoModelo",
+                    "organizacaoId",
+                    "geradoEm",
+                    "eficiencia",
+                    "rentabilidade",
+                    "vidaUtil"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Operação incompatível com o estado atual do recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Operação incompatível com o estado atual do recurso.",
+                  "example": {
+                    "erro": "Conflito",
+                    "mensagem": "Operação incompatível com o estado atual do recurso."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

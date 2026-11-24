@@ -1,0 +1,2307 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "greencode API pública",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/public/lotes": {
+      "post": {
+        "summary": "Cadastra um lote na organização da chave",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: lotes_escrita. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nf": {
+                    "type": "string",
+                    "maxLength": 80,
+                    "pattern": "\\S",
+                    "description": "Nota fiscal única por organização.",
+                    "example": "NF-530"
+                  },
+                  "transportadora": {
+                    "type": "string",
+                    "maxLength": 160,
+                    "pattern": "\\S",
+                    "description": "Nome da transportadora.",
+                    "example": "TransVerde"
+                  },
+                  "dataEntrada": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Data UTC da entrada, até 90 dias no passado. Padrão: hoje.",
+                    "example": "2026-11-24"
+                  },
+                  "equipamentos": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "tipo": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "pattern": "\\S",
+                          "description": "Tipo do equipamento.",
+                          "example": "notebook"
+                        }
+                      },
+                      "required": [
+                        "tipo"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 100
+                  }
+                },
+                "required": [
+                  "nf",
+                  "transportadora"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "nf": "NF-530",
+                "transportadora": "TransVerde",
+                "equipamentos": [
+                  {
+                    "tipo": "notebook"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "lote": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "nf": {
+                          "type": "string",
+                          "maxLength": 80,
+                          "pattern": "\\S",
+                          "description": "Nota fiscal única por organização.",
+                          "example": "NF-530"
+                        },
+                        "transportadora": {
+                          "type": "string",
+                          "maxLength": 160,
+                          "pattern": "\\S",
+                          "description": "Nome da transportadora.",
+                          "example": "TransVerde"
+                        },
+                        "dataEntrada": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Data de entrada representada às 00:00 UTC."
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "recebido",
+                            "em_triagem",
+                            "triagem_completa",
+                            "encerrado"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "nf",
+                        "transportadora",
+                        "dataEntrada",
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "equipamentos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "codigoBarrasInterno": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "loteId": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "tipo": {
+                            "type": "string",
+                            "maxLength": 120,
+                            "pattern": "\\S",
+                            "description": "Tipo do equipamento.",
+                            "example": "notebook"
+                          },
+                          "posicao": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "estadoFisico": {
+                            "type": "string",
+                            "enum": [
+                              "novo",
+                              "seminovo",
+                              "bom",
+                              "regular",
+                              "ruim",
+                              "sucata"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "aguardando_triagem",
+                              "em_triagem",
+                              "triado",
+                              "desmonte",
+                              "reciclagem",
+                              "descarte_seguro",
+                              "revenda"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "codigoBarrasInterno",
+                          "loteId",
+                          "tipo",
+                          "posicao",
+                          "estadoFisico",
+                          "status"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "lote",
+                    "equipamentos"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Operação incompatível com o estado atual do recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Operação incompatível com o estado atual do recurso.",
+                  "example": {
+                    "erro": "Conflito",
+                    "mensagem": "Operação incompatível com o estado atual do recurso."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/lotes/{id}": {
+      "get": {
+        "summary": "Consulta os dados e o status de um lote ativo",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: rastreio_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nf": {
+                      "type": "string",
+                      "maxLength": 80,
+                      "pattern": "\\S",
+                      "description": "Nota fiscal única por organização.",
+                      "example": "NF-530"
+                    },
+                    "transportadora": {
+                      "type": "string",
+                      "maxLength": 160,
+                      "pattern": "\\S",
+                      "description": "Nome da transportadora.",
+                      "example": "TransVerde"
+                    },
+                    "dataEntrada": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Data de entrada representada às 00:00 UTC."
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "recebido",
+                        "em_triagem",
+                        "triagem_completa",
+                        "encerrado"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "nf",
+                    "transportadora",
+                    "dataEntrada",
+                    "status"
+                  ],
+                  "additionalProperties": false,
+                  "example": {
+                    "id": "0bd5437b-bd61-4d3e-9e65-40d5aec8df03",
+                    "nf": "NF-530",
+                    "transportadora": "TransVerde",
+                    "dataEntrada": "2026-11-24T00:00:00.000Z",
+                    "status": "recebido"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/equipamentos/{id}/rastreio": {
+      "get": {
+        "summary": "Consulta o equipamento e seu histórico de movimentações",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: rastreio_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false,
+            "description": "Página inicial igual a 1."
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false,
+            "description": "Quantidade de itens por página."
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "equipamento": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "codigoBarrasInterno": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "loteId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "tipo": {
+                          "type": "string",
+                          "maxLength": 120,
+                          "pattern": "\\S",
+                          "description": "Tipo do equipamento.",
+                          "example": "notebook"
+                        },
+                        "posicao": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "estadoFisico": {
+                          "type": "string",
+                          "enum": [
+                            "novo",
+                            "seminovo",
+                            "bom",
+                            "regular",
+                            "ruim",
+                            "sucata"
+                          ]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "aguardando_triagem",
+                            "em_triagem",
+                            "triado",
+                            "desmonte",
+                            "reciclagem",
+                            "descarte_seguro",
+                            "revenda"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "codigoBarrasInterno",
+                        "loteId",
+                        "tipo",
+                        "posicao",
+                        "estadoFisico",
+                        "status"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "movimentacoes": {
+                      "type": "object",
+                      "properties": {
+                        "itens": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "criadoEm": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "statusDe": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "statusPara": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "estadoDe": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "estadoPara": {
+                                "type": "string",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "criadoEm",
+                              "statusDe",
+                              "statusPara",
+                              "estadoDe",
+                              "estadoPara"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "pagina": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "tamanhoPagina": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "totalPaginas": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "itens",
+                        "total",
+                        "pagina",
+                        "tamanhoPagina",
+                        "totalPaginas"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "equipamento",
+                    "movimentacoes"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/relatorios": {
+      "post": {
+        "summary": "Enfileira um relatório analítico completo",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: relatorios_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "situacao": {
+                      "type": "string",
+                      "enum": [
+                        "pendente",
+                        "processando",
+                        "concluido",
+                        "falhou"
+                      ],
+                      "example": "pendente"
+                    },
+                    "tentativas": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 0
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "concluidoEm": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    },
+                    "agendamento": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "erro": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "situacao",
+                    "tentativas",
+                    "criadoEm",
+                    "concluidoEm",
+                    "agendamento",
+                    "erro"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Lista tarefas e relatórios históricos da organização",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: relatorios_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "in": "query",
+            "name": "pagina",
+            "required": false,
+            "description": "Página inicial igual a 1."
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "in": "query",
+            "name": "tamanhoPagina",
+            "required": false,
+            "description": "Quantidade de itens por página."
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "itens": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "situacao": {
+                            "type": "string",
+                            "enum": [
+                              "pendente",
+                              "processando",
+                              "concluido",
+                              "falhou"
+                            ],
+                            "example": "pendente"
+                          },
+                          "tentativas": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "example": 0
+                          },
+                          "criadoEm": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "concluidoEm": {
+                            "type": "string",
+                            "format": "date-time",
+                            "nullable": true
+                          },
+                          "agendamento": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "erro": {
+                            "type": "string",
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "situacao",
+                          "tentativas",
+                          "criadoEm",
+                          "concluidoEm",
+                          "agendamento",
+                          "erro"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "pagina": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "tamanhoPagina": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "totalPaginas": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "itens",
+                    "total",
+                    "pagina",
+                    "tamanhoPagina",
+                    "totalPaginas"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/relatorios/{id}": {
+      "get": {
+        "summary": "Consulta a situação de uma tarefa",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: relatorios_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "situacao": {
+                      "type": "string",
+                      "enum": [
+                        "pendente",
+                        "processando",
+                        "concluido",
+                        "falhou"
+                      ],
+                      "example": "pendente"
+                    },
+                    "tentativas": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 0
+                    },
+                    "criadoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "concluidoEm": {
+                      "type": "string",
+                      "format": "date-time",
+                      "nullable": true
+                    },
+                    "agendamento": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "erro": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "situacao",
+                    "tentativas",
+                    "criadoEm",
+                    "concluidoEm",
+                    "agendamento",
+                    "erro"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/public/relatorios/{id}/download": {
+      "get": {
+        "summary": "Baixa o resultado concluído em JSON",
+        "tags": [
+          "API pública v1"
+        ],
+        "description": "Escopo exigido: relatorios_leitura. Limite por chave em janela de um minuto. Em 429, use Retry-After.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "security": [
+          {
+            "parceiroApiKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "versaoModelo": {
+                      "type": "string"
+                    },
+                    "organizacaoId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "geradoEm": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "eficiencia": {
+                      "type": "object",
+                      "properties": {
+                        "lotesAtivos": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "semConclusaoUtilizavel": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "entradaAConclusao": {
+                          "type": "object",
+                          "properties": {
+                            "lotes": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "mediaDias": {
+                              "type": "number",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "lotes",
+                            "mediaDias"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "espera": {
+                          "type": "object",
+                          "properties": {
+                            "lotes": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "mediaDias": {
+                              "type": "number",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "lotes",
+                            "mediaDias"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "triagem": {
+                          "type": "object",
+                          "properties": {
+                            "lotes": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "mediaDias": {
+                              "type": "number",
+                              "nullable": true
+                            }
+                          },
+                          "required": [
+                            "lotes",
+                            "mediaDias"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "etapaMaisLonga": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "porOperador": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "operadorId": {
+                                "type": "string",
+                                "format": "uuid"
+                              },
+                              "lotes": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "mediaDias": {
+                                "type": "number",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "operadorId",
+                              "lotes",
+                              "mediaDias"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "porMes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "mes": {
+                                "type": "string"
+                              },
+                              "lotes": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "mediaDias": {
+                                "type": "number",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "mes",
+                              "lotes",
+                              "mediaDias"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "lotesAtivos",
+                        "semConclusaoUtilizavel",
+                        "entradaAConclusao",
+                        "espera",
+                        "triagem",
+                        "etapaMaisLonga",
+                        "porOperador",
+                        "porMes"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "rentabilidade": {
+                      "type": "object",
+                      "properties": {
+                        "moeda": {
+                          "type": "string"
+                        },
+                        "equipamentosComValor": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "grupos": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "pattern": "\\S",
+                                "description": "Tipo do equipamento.",
+                                "example": "notebook"
+                              },
+                              "marca": {
+                                "type": "string"
+                              },
+                              "modelo": {
+                                "type": "string"
+                              },
+                              "estado": {
+                                "type": "string"
+                              },
+                              "amostras": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "amostrasComCusto": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "recuperacaoMedia": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "margemMedia": {
+                                "type": "number",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "marca",
+                              "modelo",
+                              "estado",
+                              "amostras",
+                              "amostrasComCusto",
+                              "recuperacaoMedia",
+                              "margemMedia"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "moeda",
+                        "equipamentosComValor",
+                        "grupos"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "vidaUtil": {
+                      "type": "object",
+                      "properties": {
+                        "metodo": {
+                          "type": "string"
+                        },
+                        "grupos": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "tipo": {
+                                "type": "string",
+                                "maxLength": 120,
+                                "pattern": "\\S",
+                                "description": "Tipo do equipamento.",
+                                "example": "notebook"
+                              },
+                              "marca": {
+                                "type": "string"
+                              },
+                              "modelo": {
+                                "type": "string"
+                              },
+                              "amostras": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "equipamentos": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "motivo": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "r2": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "idadeProjetadaDias": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "vidaRemanescenteDias": {
+                                "type": "number",
+                                "nullable": true
+                              }
+                            },
+                            "required": [
+                              "tipo",
+                              "marca",
+                              "modelo",
+                              "amostras",
+                              "equipamentos",
+                              "motivo",
+                              "r2",
+                              "idadeProjetadaDias",
+                              "vidaRemanescenteDias"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "metodo",
+                        "grupos"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "versaoModelo",
+                    "organizacaoId",
+                    "geradoEm",
+                    "eficiencia",
+                    "rentabilidade",
+                    "vidaUtil"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro ou corpo inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Parâmetro ou corpo inválido.",
+                  "example": {
+                    "erro": "ErroValidacao",
+                    "mensagem": "Parâmetro ou corpo inválido."
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave de API ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Chave de API ausente, inválida ou expirada.",
+                  "example": {
+                    "erro": "NaoAutenticado",
+                    "mensagem": "Chave de API ausente, inválida ou expirada."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não possui o escopo necessário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "A chave não possui o escopo necessário.",
+                  "example": {
+                    "erro": "ErroPermissao",
+                    "mensagem": "A chave não possui o escopo necessário."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso não encontrado para esta organização.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Recurso não encontrado para esta organização.",
+                  "example": {
+                    "erro": "NaoEncontrado",
+                    "mensagem": "Recurso não encontrado para esta organização."
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Operação incompatível com o estado atual do recurso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Operação incompatível com o estado atual do recurso.",
+                  "example": {
+                    "erro": "Conflito",
+                    "mensagem": "Operação incompatível com o estado atual do recurso."
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições por minuto atingido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Limite de requisições por minuto atingido.",
+                  "example": {
+                    "erro": "LimiteRequisicoes",
+                    "mensagem": "Limite de requisições por minuto atingido."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "erro": {
+                      "type": "string"
+                    },
+                    "mensagem": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "erro",
+                    "mensagem"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Erro interno do servidor.",
+                  "example": {
+                    "erro": "ErroInterno",
+                    "mensagem": "Erro interno do servidor."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "parceiroApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  }
+}
